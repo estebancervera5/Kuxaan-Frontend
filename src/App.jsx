@@ -54,7 +54,7 @@ const Login = ({ onLogin }) => {
     <div className="min-h-screen flex">
       {/* Left side — Brand */}
       <div
-        className="hidden lg:flex flex-col justify-between p-12 w-1/2 relative overflow-hidden"
+        className="hidden lg:flex flex-col justify-between p-8 xl:p-12 w-1/2 relative overflow-hidden"
         style={{ background: '#1E3A2F', color: '#F2EBDD' }}
       >
         <div className="absolute inset-0 kx-grid-pattern opacity-40" />
@@ -82,7 +82,7 @@ const Login = ({ onLogin }) => {
           <p className="text-xs uppercase tracking-[0.25em]" style={{ color: '#C16E4F' }}>
             Maya · estar vivo
           </p>
-          <h1 className="font-display text-5xl xl:text-6xl leading-[1.05] tracking-tight">
+          <h1 className="font-display text-4xl xl:text-6xl leading-[1.05] tracking-tight">
             La plataforma del <em className="italic font-light">servicio social</em> que da vida a los proyectos comunitarios.
           </h1>
           <p className="text-sm opacity-70 leading-relaxed max-w-sm">
@@ -97,7 +97,7 @@ const Login = ({ onLogin }) => {
       </div>
 
       {/* Right side — Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
+      <div className="flex-1 flex items-center justify-center px-5 py-8 sm:p-8">
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-3 mb-12">
             <KxMark dark />
@@ -107,7 +107,7 @@ const Login = ({ onLogin }) => {
           <p className="text-xs uppercase tracking-[0.25em] mb-3" style={{ color: '#C16E4F' }}>
             Iniciar sesión
           </p>
-          <h2 className="font-display text-4xl tracking-tight mb-2">Bienvenido de vuelta.</h2>
+          <h2 className="font-display text-3xl sm:text-4xl tracking-tight mb-2">Bienvenido de vuelta.</h2>
           <p className="text-sm opacity-60 mb-10">
             Ingresa tus credenciales para acceder a tu panel.
           </p>
@@ -147,7 +147,7 @@ const Login = ({ onLogin }) => {
             <p className="text-xs uppercase tracking-[0.2em] opacity-50">
               Demo — acceder como:
             </p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 onClick={() => onLogin('admin')}
                 className="group flex items-center justify-between px-4 py-3 rounded-md text-sm font-medium transition-all"
@@ -212,21 +212,23 @@ const AdminShell = ({ page, setPage, onLogout }) => {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar nav={nav} page={page} setPage={setPage} role="Administrador" name="Isabella Ortiz" onLogout={onLogout} />
-      <main className="flex-1 overflow-y-auto">
-        <Topbar page={nav.find(n => n.id === page)?.label} />
-        <div className="px-10 py-8 max-w-[1400px]">
-          {page === 'dashboard'   && <AdminDashboard />}
-          {page === 'students'    && <StudentsPage />}
-          {page === 'projects'    && <ProjectsPage />}
-          {page === 'assignments' && <AssignmentsPage />}
-          {page === 'hours'       && <HoursPage />}
-          {page === 'evidence'    && <EvidencePage />}
-          {page === 'reports'     && <ReportsPage />}
-        </div>
-      </main>
-    </div>
+    <AppShell
+      nav={nav}
+      page={page}
+      setPage={setPage}
+      role="Administrador"
+      name="Isabella Ortiz"
+      onLogout={onLogout}
+      maxWidth="max-w-[1400px]"
+    >
+      {page === 'dashboard'   && <AdminDashboard />}
+      {page === 'students'    && <StudentsPage />}
+      {page === 'projects'    && <ProjectsPage />}
+      {page === 'assignments' && <AssignmentsPage />}
+      {page === 'hours'       && <HoursPage />}
+      {page === 'evidence'    && <EvidencePage />}
+      {page === 'reports'     && <ReportsPage />}
+    </AppShell>
   );
 };
 
@@ -243,28 +245,44 @@ const StudentShell = ({ page, setPage, onLogout }) => {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar nav={nav} page={page} setPage={setPage} role="Estudiante" name="Diego Pech Canul" onLogout={onLogout} accent />
-      <main className="flex-1 overflow-y-auto">
-        <Topbar page={nav.find(n => n.id === page)?.label} />
-        <div className="px-10 py-8 max-w-[1100px]">
-          {page === 'dashboard' && <StudentDashboard />}
-          {page === 'profile'   && <StudentProfile />}
-          {page === 'project'   && <StudentProject />}
-          {page === 'hours'     && <StudentHours />}
-          {page === 'evidence'  && <StudentEvidence />}
-        </div>
-      </main>
-    </div>
+    <AppShell
+      nav={nav}
+      page={page}
+      setPage={setPage}
+      role="Estudiante"
+      name="Diego Pech Canul"
+      onLogout={onLogout}
+      accent
+      maxWidth="max-w-[1100px]"
+    >
+      {page === 'dashboard' && <StudentDashboard />}
+      {page === 'profile'   && <StudentProfile />}
+      {page === 'project'   && <StudentProject />}
+      {page === 'hours'     && <StudentHours />}
+      {page === 'evidence'  && <StudentEvidence />}
+    </AppShell>
   );
 };
 
 // ============================================================
-// SIDEBAR  (shared)
+// APP SHELL / NAVIGATION  (shared)
 // ============================================================
+const AppShell = ({ nav, page, setPage, role, name, onLogout, accent, maxWidth, children }) => (
+  <div className="min-h-screen lg:h-screen lg:overflow-hidden lg:flex">
+    <Sidebar nav={nav} page={page} setPage={setPage} role={role} name={name} onLogout={onLogout} accent={accent} />
+    <main className="min-w-0 flex-1 lg:overflow-y-auto pb-24 lg:pb-0">
+      <Topbar page={nav.find(n => n.id === page)?.label} />
+      <div className={`w-full ${maxWidth} px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8`}>
+        {children}
+      </div>
+    </main>
+    <MobileNav nav={nav} page={page} setPage={setPage} onLogout={onLogout} />
+  </div>
+);
+
 const Sidebar = ({ nav, page, setPage, role, name, onLogout, accent }) => (
   <aside
-    className="w-64 flex flex-col border-r"
+    className="hidden lg:flex w-64 flex-col border-r shrink-0"
     style={{ background: '#1E3A2F', color: '#F2EBDD', borderColor: 'rgba(0,0,0,0.2)' }}
   >
     <div className="p-6 flex items-center gap-3 border-b" style={{ borderColor: 'rgba(242,235,221,0.1)' }}>
@@ -326,12 +344,48 @@ const Sidebar = ({ nav, page, setPage, role, name, onLogout, accent }) => (
   </aside>
 );
 
+const MobileNav = ({ nav, page, setPage, onLogout }) => (
+  <div
+    className="fixed inset-x-0 bottom-0 z-40 border-t lg:hidden"
+    style={{ background: '#1E3A2F', color: '#F2EBDD', borderColor: 'rgba(242,235,221,0.14)' }}
+  >
+    <div className="flex items-center gap-1 overflow-x-auto px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      {nav.map(({ id, label, icon: Icon }) => {
+        const active = page === id;
+        return (
+          <button
+            key={id}
+            onClick={() => setPage(id)}
+            className="min-w-[76px] flex flex-col items-center justify-center gap-1 rounded-md px-2 py-2 text-[10px] transition-colors"
+            style={{
+              background: active ? 'rgba(242,235,221,0.1)' : 'transparent',
+              color: active ? '#F2EBDD' : 'rgba(242,235,221,0.68)',
+            }}
+          >
+            <Icon size={17} strokeWidth={1.7} />
+            <span className="max-w-[72px] truncate">{label}</span>
+          </button>
+        );
+      })}
+      <button
+        onClick={onLogout}
+        className="min-w-[56px] flex flex-col items-center justify-center gap-1 rounded-md px-2 py-2 text-[10px]"
+        style={{ color: 'rgba(242,235,221,0.68)' }}
+        title="Cerrar sesión"
+      >
+        <LogOut size={17} strokeWidth={1.7} />
+        <span>Salir</span>
+      </button>
+    </div>
+  </div>
+);
+
 // ============================================================
 // TOPBAR
 // ============================================================
 const Topbar = ({ page }) => (
   <div
-    className="flex items-center justify-between px-10 py-5 border-b"
+    className="flex flex-col gap-3 px-4 py-4 border-b sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-10 lg:py-5"
     style={{ borderColor: 'rgba(26,26,23,0.08)' }}
   >
     <div>
@@ -340,7 +394,7 @@ const Topbar = ({ page }) => (
       </p>
       <h1 className="font-display text-2xl tracking-tight mt-0.5">{page}</h1>
     </div>
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 sm:gap-3">
       <button className="p-2.5 rounded-md hover:bg-black/5 transition-colors">
         <Search size={16} strokeWidth={1.8} />
       </button>
@@ -349,7 +403,7 @@ const Topbar = ({ page }) => (
         <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full" style={{ background: '#C16E4F' }} />
       </button>
       <div className="h-6 w-px" style={{ background: 'rgba(26,26,23,0.15)' }} />
-      <div className="text-xs opacity-60">
+      <div className="hidden text-xs opacity-60 sm:block">
         {new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}
       </div>
     </div>
@@ -370,12 +424,12 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-10">
       {/* Hero strip */}
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-xl">
           <p className="text-[10px] uppercase tracking-[0.25em] mb-3" style={{ color: '#C16E4F' }}>
             Periodo Enero – Junio 2026
           </p>
-          <h2 className="font-display text-4xl tracking-tight leading-tight">
+          <h2 className="font-display text-3xl sm:text-4xl tracking-tight leading-tight">
             Buenos días, Isabella. <em className="italic font-light opacity-70">El servicio sigue vivo.</em>
           </h2>
         </div>
@@ -388,7 +442,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map((m) => (
           <div
             key={m.label}
@@ -406,10 +460,10 @@ const AdminDashboard = () => {
       </div>
 
       {/* Two columns */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         {/* Activity chart */}
         <div
-          className="col-span-2 p-6 rounded-lg border bg-white/40"
+          className="p-4 sm:p-6 rounded-lg border bg-white/40 xl:col-span-2"
           style={{ borderColor: 'rgba(26,26,23,0.1)' }}
         >
           <div className="flex items-center justify-between mb-6">
@@ -427,7 +481,7 @@ const AdminDashboard = () => {
 
         {/* Recent activity */}
         <div
-          className="p-6 rounded-lg border bg-white/40"
+          className="p-4 sm:p-6 rounded-lg border bg-white/40"
           style={{ borderColor: 'rgba(26,26,23,0.1)' }}
         >
           <h3 className="font-display text-lg tracking-tight mb-1">Actividad reciente</h3>
@@ -452,7 +506,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Projects status */}
-      <div className="p-6 rounded-lg border bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
+      <div className="p-4 sm:p-6 rounded-lg border bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
         <div className="flex items-center justify-between mb-5">
           <div>
             <h3 className="font-display text-lg tracking-tight">Proyectos más activos</h3>
@@ -469,19 +523,19 @@ const AdminDashboard = () => {
             { name: 'Salud Itinerante Yucatán', area: 'Salud', students: 9, hours: 620, pct: 54 },
             { name: 'Lengua Maya en Aulas', area: 'Cultura', students: 7, hours: 410, pct: 38 },
           ].map((p) => (
-            <div key={p.name} className="grid grid-cols-12 items-center gap-4 py-2">
-              <div className="col-span-4">
+            <div key={p.name} className="grid grid-cols-2 gap-3 py-3 sm:grid-cols-12 sm:items-center sm:gap-4 sm:py-2">
+              <div className="col-span-2 sm:col-span-4">
                 <div className="text-sm font-medium">{p.name}</div>
                 <div className="text-[11px] opacity-50">{p.area}</div>
               </div>
-              <div className="col-span-2 text-xs opacity-70">{p.students} estudiantes</div>
-              <div className="col-span-2 text-xs opacity-70">{p.hours} h</div>
-              <div className="col-span-3">
+              <div className="text-xs opacity-70 sm:col-span-2">{p.students} estudiantes</div>
+              <div className="text-xs opacity-70 sm:col-span-2">{p.hours} h</div>
+              <div className="col-span-2 sm:col-span-3">
                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(26,26,23,0.08)' }}>
                   <div className="h-full rounded-full" style={{ width: `${p.pct}%`, background: '#1E3A2F' }} />
                 </div>
               </div>
-              <div className="col-span-1 text-xs text-right opacity-70">{p.pct}%</div>
+              <div className="text-xs opacity-70 sm:col-span-1 sm:text-right">{p.pct}%</div>
             </div>
           ))}
         </div>
@@ -543,9 +597,9 @@ const StudentsPage = () => {
       />
 
       {/* Filters */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <div
-          className="flex items-center gap-2 px-3 py-2 rounded-md flex-1 max-w-xs border bg-white/40"
+          className="flex w-full items-center gap-2 rounded-md border bg-white/40 px-3 py-2 sm:max-w-xs sm:flex-1"
           style={{ borderColor: 'rgba(26,26,23,0.1)' }}
         >
           <Search size={14} className="opacity-50" />
@@ -562,10 +616,10 @@ const StudentsPage = () => {
 
       {/* Table */}
       <div
-        className="rounded-lg border overflow-hidden bg-white/40"
+        className="rounded-lg border overflow-x-auto bg-white/40"
         style={{ borderColor: 'rgba(26,26,23,0.1)' }}
       >
-        <table className="w-full text-sm">
+        <table className="min-w-[780px] w-full text-sm">
           <thead style={{ background: 'rgba(30,58,47,0.04)' }}>
             <tr className="text-left">
               {['Nombre', 'Carrera', 'Universidad', 'Periodo', 'Horas', 'Estado', ''].map((h) => (
@@ -643,17 +697,17 @@ const StatusPill = ({ status }) => {
 };
 
 const PageHeader = ({ eyebrow, title, subtitle, action }) => (
-  <div className="flex items-end justify-between">
+  <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
     <div>
       <p className="text-[10px] uppercase tracking-[0.25em] mb-2" style={{ color: '#C16E4F' }}>
         {eyebrow}
       </p>
-      <h2 className="font-display text-4xl tracking-tight">{title}</h2>
+      <h2 className="font-display text-3xl sm:text-4xl tracking-tight">{title}</h2>
       {subtitle && <p className="text-sm opacity-60 mt-2">{subtitle}</p>}
     </div>
     {action && (
       <button
-        className="flex items-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all hover:opacity-90"
+        className="flex min-h-11 items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-all hover:opacity-90 sm:min-h-0"
         style={{ background: '#1E3A2F', color: '#F2EBDD' }}
       >
         <action.icon size={14} /> {action.label}
@@ -684,7 +738,7 @@ const ProjectsPage = () => {
         action={{ label: 'Nuevo proyecto', icon: Plus }}
       />
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {projects.map((p, i) => (
           <div
             key={i}
@@ -731,8 +785,8 @@ const AssignmentsPage = () => {
         subtitle="Vincula estudiantes con proyectos comunitarios"
       />
 
-      <div className="grid grid-cols-2 gap-6">
-        <div className="p-6 rounded-lg border bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="p-4 sm:p-6 rounded-lg border bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
           <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-2">Paso 1</p>
           <h3 className="font-display text-2xl tracking-tight mb-5">Selecciona el proyecto</h3>
           <select className="w-full text-sm bg-transparent border rounded-md px-3 py-2.5"
@@ -751,7 +805,7 @@ const AssignmentsPage = () => {
           </div>
         </div>
 
-        <div className="p-6 rounded-lg border bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
+        <div className="p-4 sm:p-6 rounded-lg border bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
           <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-2">Paso 2</p>
           <h3 className="font-display text-2xl tracking-tight mb-5">
             Selecciona estudiantes <span className="opacity-50 text-base">({selected.length})</span>
@@ -821,15 +875,15 @@ const HoursPage = () => {
         action={{ label: 'Exportar', icon: Download }}
       />
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <FilterChip label="Estudiante" />
         <FilterChip label="Proyecto" />
         <FilterChip label="Mes" />
         <FilterChip label="Rango de fechas" />
       </div>
 
-      <div className="rounded-lg border overflow-hidden bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
-        <table className="w-full text-sm">
+      <div className="rounded-lg border overflow-x-auto bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
+        <table className="min-w-[860px] w-full text-sm">
           <thead style={{ background: 'rgba(30,58,47,0.04)' }}>
             <tr className="text-left">
               {['Estudiante', 'Proyecto', 'Fecha', 'Horas', 'Descripción', ''].map((h) => (
@@ -886,7 +940,7 @@ const EvidencePage = () => {
         subtitle="1,107 archivos cargados · 86 esta semana"
       />
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((e, i) => (
           <div
             key={i}
@@ -945,9 +999,9 @@ const ReportsPage = () => {
       />
 
       {/* Filters card */}
-      <div className="p-6 rounded-lg border bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
+      <div className="p-4 sm:p-6 rounded-lg border bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
         <h3 className="font-display text-lg tracking-tight mb-4">Filtros</h3>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <FilterSelect label="Periodo"     options={['Ene–Jun 2026', 'Ago–Dic 2025', 'Todos']} />
           <FilterSelect label="Proyecto"    options={['Todos', 'Milpa Maya', 'Salud Itinerante']} />
           <FilterSelect label="Estudiante"  options={['Todos', 'Por carrera', 'Por universidad']} />
@@ -958,11 +1012,11 @@ const ReportsPage = () => {
       {/* Report types */}
       <div>
         <h3 className="font-display text-2xl tracking-tight mb-5">Tipos de reporte</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           {types.map((t, i) => (
             <div
               key={i}
-              className="p-5 rounded-lg border bg-white/40 hover:bg-white/60 transition-all cursor-pointer group flex items-center gap-5"
+              className="flex flex-col gap-4 rounded-lg border bg-white/40 p-4 transition-all hover:bg-white/60 sm:flex-row sm:items-center sm:gap-5 sm:p-5"
               style={{ borderColor: 'rgba(26,26,23,0.1)' }}
             >
               <div
@@ -975,7 +1029,7 @@ const ReportsPage = () => {
                 <h4 className="font-display text-lg tracking-tight">{t.title}</h4>
                 <p className="text-xs opacity-65 mt-0.5">{t.desc}</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 sm:ml-auto">
                 <button className="px-3 py-1.5 rounded-md text-xs border flex items-center gap-1.5"
                   style={{ borderColor: 'rgba(26,26,23,0.15)' }}>
                   <Download size={12} /> PDF
@@ -1012,14 +1066,14 @@ const StudentDashboard = () => (
       <p className="text-[10px] uppercase tracking-[0.25em] mb-3" style={{ color: '#C16E4F' }}>
         Periodo Enero – Junio 2026
       </p>
-      <h2 className="font-display text-4xl tracking-tight leading-tight max-w-xl">
+      <h2 className="font-display text-3xl sm:text-4xl tracking-tight leading-tight max-w-xl">
         Hola, Diego. <em className="italic font-light opacity-70">Vas por buen camino.</em>
       </h2>
     </div>
 
     {/* Progress card */}
     <div
-      className="p-8 rounded-lg relative overflow-hidden"
+      className="relative overflow-hidden rounded-lg p-5 sm:p-8"
       style={{ background: '#1E3A2F', color: '#F2EBDD' }}
     >
       <div className="absolute inset-0 kx-grid-pattern opacity-30" />
@@ -1029,10 +1083,10 @@ const StudentDashboard = () => (
         <rect x="180" y="180" width="40" height="40" stroke="#F2EBDD" strokeWidth="2" />
       </svg>
 
-      <div className="relative z-10 grid grid-cols-3 gap-8">
+      <div className="relative z-10 grid grid-cols-1 gap-7 md:grid-cols-3 md:gap-8">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] opacity-60 mb-3">Horas acumuladas</p>
-          <div className="font-display text-6xl tracking-tight leading-none">
+          <div className="font-display text-5xl sm:text-6xl tracking-tight leading-none">
             142<span className="text-3xl opacity-50">/240</span>
           </div>
           <div className="mt-4 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(242,235,221,0.15)' }}>
@@ -1053,21 +1107,21 @@ const StudentDashboard = () => (
 
         <div>
           <p className="text-xs uppercase tracking-[0.2em] opacity-60 mb-3">Evidencias</p>
-          <div className="font-display text-6xl tracking-tight leading-none">14</div>
+          <div className="font-display text-5xl sm:text-6xl tracking-tight leading-none">14</div>
           <p className="text-xs opacity-70 mt-3">Archivos cargados · última hace 2 días</p>
         </div>
       </div>
     </div>
 
     {/* Quick actions */}
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <div
-        className="p-6 rounded-lg border bg-white/40 hover:bg-white/60 transition-all cursor-pointer group flex items-center justify-between"
+        className="flex items-center justify-between rounded-lg border bg-white/40 p-4 transition-all hover:bg-white/60 sm:p-6"
         style={{ borderColor: 'rgba(26,26,23,0.1)' }}
       >
         <div>
           <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-1">Acción rápida</p>
-          <h3 className="font-display text-2xl tracking-tight">Registrar nuevas horas</h3>
+          <h3 className="font-display text-xl sm:text-2xl tracking-tight">Registrar nuevas horas</h3>
           <p className="text-xs opacity-65 mt-1">Anota tu actividad de hoy</p>
         </div>
         <div
@@ -1079,12 +1133,12 @@ const StudentDashboard = () => (
       </div>
 
       <div
-        className="p-6 rounded-lg border bg-white/40 hover:bg-white/60 transition-all cursor-pointer group flex items-center justify-between"
+        className="flex items-center justify-between rounded-lg border bg-white/40 p-4 transition-all hover:bg-white/60 sm:p-6"
         style={{ borderColor: 'rgba(26,26,23,0.1)' }}
       >
         <div>
           <p className="text-[10px] uppercase tracking-[0.2em] opacity-60 mb-1">Acción rápida</p>
-          <h3 className="font-display text-2xl tracking-tight">Subir evidencias</h3>
+          <h3 className="font-display text-xl sm:text-2xl tracking-tight">Subir evidencias</h3>
           <p className="text-xs opacity-65 mt-1">PDF o imagen, hasta 10 MB</p>
         </div>
         <div
@@ -1097,7 +1151,7 @@ const StudentDashboard = () => (
     </div>
 
     {/* History */}
-    <div className="p-6 rounded-lg border bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
+    <div className="p-4 sm:p-6 rounded-lg border bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
       <h3 className="font-display text-lg tracking-tight mb-1">Últimos registros</h3>
       <p className="text-xs opacity-60 mb-5">Tus actividades más recientes</p>
       <div className="space-y-3">
@@ -1107,7 +1161,7 @@ const StudentDashboard = () => (
           { date: '05 May', hours: 6, desc: 'Capacitación con familias del oriente' },
           { date: '01 May', hours: 3, desc: 'Reunión de planeación mensual' },
         ].map((h, i) => (
-          <div key={i} className="flex items-center gap-5 py-2">
+          <div key={i} className="flex flex-wrap items-center gap-3 py-2 sm:gap-5">
             <div className="text-xs font-mono opacity-70 w-16">{h.date}</div>
             <div className="font-display text-xl" style={{ color: '#C16E4F' }}>
               {h.hours}<span className="text-xs opacity-50 ml-0.5">h</span>
@@ -1128,8 +1182,8 @@ const StudentProfile = () => (
   <div className="space-y-8">
     <PageHeader eyebrow="Mi cuenta" title="Información personal" />
 
-    <div className="grid grid-cols-3 gap-6">
-      <div className="p-6 rounded-lg border bg-white/40 text-center" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="p-4 sm:p-6 rounded-lg border bg-white/40 text-center" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
         <div
           className="w-24 h-24 rounded-full mx-auto flex items-center justify-center font-display text-3xl mb-4"
           style={{ background: '#1E3A2F', color: '#F2EBDD' }}
@@ -1144,7 +1198,7 @@ const StudentProfile = () => (
         </div>
       </div>
 
-      <div className="col-span-2 p-6 rounded-lg border bg-white/40 space-y-5" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
+      <div className="space-y-5 rounded-lg border bg-white/40 p-4 sm:p-6 lg:col-span-2" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
         <InfoRow label="Nombre completo"   value="Diego Alejandro Pech Canul" />
         <InfoRow label="Correo electrónico" value="diego.pech@uady.mx" />
         <InfoRow label="Carrera"           value="Ingeniería en Sistemas Computacionales" />
@@ -1157,10 +1211,10 @@ const StudentProfile = () => (
 );
 
 const InfoRow = ({ label, value, last }) => (
-  <div className={`flex items-center justify-between pb-4 ${!last ? 'border-b' : ''}`}
+  <div className={`flex flex-col gap-1 pb-4 sm:flex-row sm:items-center sm:justify-between ${!last ? 'border-b' : ''}`}
     style={{ borderColor: 'rgba(26,26,23,0.08)' }}>
     <span className="text-[11px] uppercase tracking-[0.18em] opacity-60">{label}</span>
-    <span className="text-sm font-medium">{value}</span>
+    <span className="text-sm font-medium sm:text-right">{value}</span>
   </div>
 );
 
@@ -1171,8 +1225,8 @@ const StudentProject = () => (
   <div className="space-y-8">
     <PageHeader eyebrow="Mi proyecto" title="Milpa Maya Comunitaria" />
 
-    <div className="grid grid-cols-3 gap-6">
-      <div className="col-span-2 p-8 rounded-lg border bg-white/40" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="rounded-lg border bg-white/40 p-5 sm:p-8 lg:col-span-2" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
         <span className="text-[10px] uppercase tracking-[0.2em] px-2 py-1 rounded"
           style={{ background: 'rgba(193,110,79,0.12)', color: '#9F5235' }}>
           Agroecología
@@ -1188,7 +1242,7 @@ const StudentProject = () => (
           fortalezcan la seguridad alimentaria de las comunidades.
         </p>
 
-        <div className="grid grid-cols-2 gap-4 mt-8">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Detail label="Responsable" value="Dra. Luisa Cetina Tun" />
           <Detail label="Comunidad"   value="Tixkokob, Yucatán" />
           <Detail label="Estado"      value="Activo · en ejecución" />
@@ -1230,9 +1284,9 @@ const StudentHours = () => (
       subtitle="Documenta tu actividad del día"
     />
 
-    <div className="grid grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <form
-        className="col-span-2 p-8 rounded-lg border bg-white/40 space-y-6"
+        className="space-y-6 rounded-lg border bg-white/40 p-5 sm:p-8 lg:col-span-2"
         style={{ borderColor: 'rgba(26,26,23,0.1)' }}
       >
         <FormField label="Proyecto">
@@ -1242,7 +1296,7 @@ const StudentHours = () => (
           </select>
         </FormField>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <FormField label="Fecha de la actividad">
             <input type="date" defaultValue="2026-05-14"
               className="w-full bg-transparent outline-none text-sm py-2 border-b"
@@ -1322,11 +1376,11 @@ const StudentEvidence = () => (
       subtitle="Carga archivos que respalden tu actividad"
     />
 
-    <div className="grid grid-cols-3 gap-6">
-      <div className="col-span-2 space-y-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="space-y-6 lg:col-span-2">
         {/* Dropzone */}
         <div
-          className="p-12 rounded-lg border-2 border-dashed text-center bg-white/40 hover:bg-white/60 transition-all cursor-pointer"
+          className="rounded-lg border-2 border-dashed bg-white/40 p-6 text-center transition-all hover:bg-white/60 sm:p-12"
           style={{ borderColor: 'rgba(30,58,47,0.25)' }}
         >
           <div
@@ -1345,7 +1399,7 @@ const StudentEvidence = () => (
         </div>
 
         {/* Form */}
-        <div className="p-6 rounded-lg border bg-white/40 space-y-5" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
+        <div className="space-y-5 rounded-lg border bg-white/40 p-4 sm:p-6" style={{ borderColor: 'rgba(26,26,23,0.1)' }}>
           <FormField label="Proyecto asociado">
             <select className="w-full bg-transparent outline-none text-sm py-2 border-b"
               style={{ borderColor: 'rgba(26,26,23,0.2)' }}>
