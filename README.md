@@ -1,7 +1,8 @@
 # KUXAAN — Frontend
 
 Plataforma web para la gestión de servicio social comunitario.
-Construida con **React + Vite + Tailwind CSS**.
+Construida con **React + Vite + Tailwind CSS** y conectada al backend
+`PlataformaKuxaan_backend`.
 
 ---
 
@@ -20,8 +21,28 @@ npm run dev
 
 Abre **http://localhost:5173** en el navegador.
 
-En el login encontrarás dos botones de demo (Administrador / Estudiante)
-que te dejan entrar sin backend para explorar las pantallas.
+> El backend debe estar corriendo en `http://localhost:3000` (o en la URL que
+> configures en `.env`). **No hay modo de demostración sin backend**: el login
+> valida las credenciales contra la API real.
+
+---
+
+## 🔐 Inicio de sesión
+
+Hay **un solo formulario de login para los dos roles**. El backend responde con
+el rol dentro del JWT y la aplicación decide qué panel montar:
+
+| Rol en el backend | Vista que se monta | Secciones |
+| ----------------- | ------------------ | --------- |
+| `ADMINISTRADOR`   | `AdminShell`       | Panel general, Estudiantes, Proyectos, Asignaciones, Control de horas, Evidencias, Reportes, Mi cuenta |
+| `ESTUDIANTE`      | `StudentShell`     | Inicio, Mi perfil, Mi proyecto, Registrar horas, Subir evidencias, Mi cuenta |
+
+Las cuentas de estudiante **las crea el administrador** desde la sección
+Estudiantes; no existe auto-registro. Si un estudiante olvida su contraseña, el
+administrador la restablece desde la misma tabla.
+
+La sesión se guarda en `localStorage`. Si el backend responde `401` (token
+expirado), el adaptador limpia la sesión y la app regresa al login sola.
 
 ---
 
@@ -36,7 +57,7 @@ kuxaan-frontend/
 │   ├── main.jsx         ← Punto de entrada
 │   ├── index.css        ← Tailwind
 │   └── lib/
-│       └── api.js       ← Cliente axios (LISTO para conectar al backend)
+│       └── api.js       ← Cliente axios + adaptador del contrato del backend
 ├── index.html
 ├── package.json
 ├── vite.config.js
@@ -47,12 +68,26 @@ kuxaan-frontend/
 
 ---
 
-## 🔌 Conectar al backend
+## 🔌 Cómo habla con el backend
 
-Toda la lógica para hablar con el backend está en **`src/lib/api.js`**,
-organizada por módulo (`auth`, `students`, `projects`, `hours`, etc).
+Toda la comunicación pasa por **`src/lib/api.js`**, que es la única capa donde
+se traduce el contrato real del backend (español, envoltorio
+`{ exito, mensaje, datos }`, roles en mayúsculas) a las formas limpias que
+consumen los componentes.
 
-### Paso 1 — Configurar la URL del backend
+```javascript
+import { auth, students, me } from './lib/api';
+
+const { role } = await auth.login('admin@kuxaan.com', 'Admin123');
+const lista    = await students.list();   // [{ id, name, career, hours, ... }]
+const perfil   = await me.profile();      // { name, hours, requiredHours, projects: [...] }
+```
+
+Los normalizadores (`mapStudent`, `mapProject`, `mapProfile`, …) garantizan que
+**ningún componente vea campos crudos de Prisma**. Si el backend cambia un
+nombre de campo, se ajusta solo aquí.
+
+### Configurar la URL del backend
 
 En `.env`:
 
@@ -60,65 +95,31 @@ En `.env`:
 VITE_API_URL=http://localhost:3000/api
 ```
 
-### Paso 2 — Usar el cliente en cualquier componente
-
-```javascript
-import { auth, students } from './lib/api';
-
-// Login
-const { token, role } = await auth.login('correo@kuxaan.org', 'password');
-
-// Listar estudiantes
-const lista = await students.list();
-
-// Crear estudiante
-await students.create({ name: 'Pedro Cetina', career: 'Sistemas', ... });
-```
-
-### Paso 3 — Reemplazar los botones de demo del login
-
-En `src/App.jsx`, busca el componente `Login` y cambia los botones
-de demo por una llamada real:
-
-```javascript
-import { auth } from './lib/api';
-
-const handleLogin = async () => {
-  try {
-    const { role } = await auth.login(email, password);
-    onLogin(role);  // 'admin' o 'student'
-  } catch (e) {
-    alert('Credenciales incorrectas');
-  }
-};
-```
-
 ---
 
-## 🧩 Endpoints que espera el cliente
+## 🧩 Endpoints que consume
 
-El archivo `src/lib/api.js` ya tiene definidos todos los endpoints
-que el backend debe exponer. Tu backend Node.js debe implementarlos
-en **`http://localhost:3000/api`**:
-
-| Método | Ruta                          | Descripción                       |
-| ------ | ----------------------------- | --------------------------------- |
-| POST   | `/auth/login`                 | Autenticación, devuelve JWT y rol |
-| GET    | `/students`                   | Lista de estudiantes              |
-| POST   | `/students`                   | Crear estudiante                  |
-| PUT    | `/students/:id`               | Actualizar estudiante             |
-| DELETE | `/students/:id`               | Eliminar estudiante               |
-| GET    | `/projects`                   | Lista de proyectos                |
-| POST   | `/projects`                   | Crear proyecto                    |
-| GET    | `/projects/:id/students`      | Estudiantes asignados a proyecto  |
-| POST   | `/assignments`                | Asignar estudiantes a proyecto    |
-| GET    | `/hours`                      | Registros de horas                |
-| POST   | `/hours`                      | Registrar horas                   |
-| GET    | `/evidence`                   | Lista de evidencias               |
-| POST   | `/evidence` (multipart)       | Subir archivo de evidencia        |
-| GET    | `/reports/general?format=pdf` | Descargar reporte general         |
-| GET    | `/dashboard/stats`            | Métricas del panel admin          |
-| GET    | `/student/me`                 | Datos del estudiante logueado     |
+| Método | Ruta | Usado en |
+| ------ | ---- | -------- |
+| POST | `/auth/login` | Login |
+| POST | `/auth/register` | Mi cuenta → Nuevo administrador |
+| PUT | `/auth/password` | Mi cuenta → Cambiar contraseña |
+| GET / POST | `/students` | Tabla de estudiantes y alta |
+| PUT / DELETE | `/students/:id` | Editar y eliminar estudiante |
+| PUT | `/students/:id/password` | Restablecer contraseña de un estudiante |
+| GET / PUT | `/students/me` | Perfil del estudiante y su edición |
+| GET | `/students/me/project` | Selector de proyecto del estudiante |
+| GET / POST | `/projects` | Tarjetas de proyectos y alta |
+| GET / PUT / DELETE | `/projects/:id` | Detalle, edición y borrado |
+| GET | `/projects/:id/students` | Estudiantes asignados (detalle y "Mi proyecto") |
+| GET / POST / DELETE | `/assignments` | Asignar y desasignar estudiantes |
+| GET / POST | `/hours` | Control de horas y registro |
+| PUT / DELETE | `/hours/:id` | Editar y eliminar registros |
+| GET / POST | `/evidence` | Galería de evidencias y carga |
+| GET | `/evidence/:id/file` | Descargar el archivo |
+| DELETE | `/evidence/:id` | Eliminar evidencia |
+| GET | `/reports/{students,projects,hours,evidence,general}` | Exportación a CSV |
+| GET | `/dashboard/stats` | Métricas del panel admin |
 
 ---
 
@@ -134,16 +135,15 @@ en **`http://localhost:3000/api`**:
 
 ## ⚠️ CORS en desarrollo
 
-Cuando conectes el backend, asegúrate de que tu servidor Node.js
-permita peticiones desde `http://localhost:5173`. En Express:
+El backend ya usa `cors()` abierto, así que en desarrollo local no hace falta
+configurar nada. Si lo restringes al desplegar, permite el origen del frontend:
 
 ```javascript
-import cors from 'cors';
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 ```
 
-Si no quieres lidiar con CORS en desarrollo, abre `vite.config.js`
-y descomenta el bloque `proxy` que ya está preparado.
+Alternativamente, abre `vite.config.js` y descomenta el bloque `proxy` que ya
+está preparado.
 
 ---
 
